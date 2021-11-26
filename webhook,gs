@@ -1,4 +1,7 @@
 'use strict';
+/***************************************************
+ Google 拡張サービスの Youtube Data API を有効化しておく
+****************************************************/
 
 const ACCESS_TOKEN = 'Message API の Channel access token';
 
