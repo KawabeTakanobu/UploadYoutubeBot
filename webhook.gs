@@ -76,7 +76,7 @@ function doPost(e) {
           status: {privacyStatus: 'private'}  // 非公開
         };
         const newVideo = YouTube.Videos.insert( videoResource, 'snippet,status', fileBlob);
-        reply(newVideo ? '動画を登録しました' : '動画の登録に失敗しました');
+        reply('動画を登録しました');
       }
       else {
         reply('未知のメッセージタイプです：' + event.message.type)
