@@ -26,7 +26,7 @@ function doPost(e) {
     }
 
     // 返信用の関数
-    var reply = function(message) {
+    let reply = function(message) {
       UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
         'method' : 'post',
         'headers' : {
@@ -60,23 +60,42 @@ function doPost(e) {
         });
         // 取得したファイルを Blob 形式に変換
         const fileBlob = response.getBlob();
+        const videoTitle = event.message.fileName || (function(d){
+          return d.getFullYear() + '/' + 
+            ('00' + (d.getMonth() + 1)).slice(-2) + '/' + 
+            ('00' + d.getDate()).slice(-2) + ' ' +
+            ('00' + d.getHours()).slice(-2) + ':' +
+            ('00' + d.getMinutes()).slice(-2) + ':' +
+            ('00' + d.getSeconds()).slice(-2); 
+        })(new Date());
         const videoResource = {
           snippet: {
-            title: event.message.fileName || (function(d){
-                return d.getFullYear() + '/' + 
-                  ('00' + (d.getMonth() + 1)).slice(-2) + '/' + 
-                  ('00' + d.getDate()).slice(-2) + ' ' +
-                  ('00' + d.getHours()).slice(-2) + ':' +
-                  ('00' + d.getMinutes()).slice(-2) + ':' +
-                  ('00' + d.getSeconds()).slice(-2); 
-              })(new Date()),
+            title: videoTitle,
             description: 'Line からアップロードされたファイル',
             categoryId: '22',
           },
           status: {privacyStatus: 'private'}  // 非公開
         };
+
         const newVideo = YouTube.Videos.insert( videoResource, 'snippet,status', fileBlob);
-        reply('動画を登録しました');
+
+        // 月単位でプレイリストを作成し、アップロードした動画を追加する
+        const playListTitle = (function(d){
+          return d.getFullYear() + '年' + 
+            ('00' + (d.getMonth() + 1)).slice(-2) + '月';
+        })(new Date());
+
+        YouTube.PlaylistItems.insert({
+          snippet: {
+            playlistId: getPlayListId(playListTitle),
+            resourceId: {
+              kind: 'youtube#video',
+              videoId: newVideo.id
+            }
+          }
+        }, 'snippet');
+
+        reply('動画を登録しました\r\n\r\nタイトル：' + videoTitle + '\r\nプレイリスト：' + playListTitle);
       }
       else {
         reply('未知のメッセージタイプです：' + event.message.type)
@@ -86,4 +105,35 @@ function doPost(e) {
       reply(e.message);
     }
   });
+}
+
+// プレイリストのタイトルを指定して、該当するプレイリストのIDを取得する
+function getPlayListId(title) {
+  let nextToken = '';
+  while(nextToken != null) {
+    let result = YouTube.Playlists.list('snippet,id',{
+      maxResults: 50,
+      mine: true,
+      pageToken: nextToken
+    });
+    let len = result.items.length;
+    for(let i = 0; i < len; i++) {
+      if(result.items[i].snippet.title == title) {
+        return result.items[i].id;
+      }
+    }
+    nextToken = result.nextPageToken;
+  }
+
+  // 該当するプレイリストがない場合は作成する
+  const newPlaylist = YouTube.Playlists.insert({
+    snippet: {
+      title: title
+    },
+    status: {
+      privacyStatus: 'private'
+    }
+  }, 'snippet,status');
+
+  return newPlaylist.id;
 }
