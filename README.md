@@ -1,6 +1,8 @@
 # UploadYoutubeBot
 受信した動画をYoutubeへ非公開でアップロードするLINE BOT
+Google Photo が有料になったので、とりあえず撮った動画をYouTubeに保存する。
 
+# 備忘
 タイムゾーンを日本にするためにappsscriot.jsonを修正すると
 
 youtube.videos.insert の呼び出しに失敗しました: The request cannot be completed because you have exceeded your <a href="/youtube/v3/getting-started#quota">quota</a>.
