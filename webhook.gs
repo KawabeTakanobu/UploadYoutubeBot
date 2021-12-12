@@ -50,22 +50,22 @@ function doPost(e) {
         // 前回登録した動画のタイトルを変更する
         const title = (event.message.text || '').replace(/^\s+|\s+$/,'');
         if(title == '') {
-          throw new Exception('不正な動画名です');
+          throw new Error('不正な動画名です');
         }
         // 前回登録した Video の ID を取得する
         const id = PropertiesService.getScriptProperties().getProperty('VIDEO_ID');
         if(!id || id == '') {
-          throw new Exception('前回登録した動画IDの取得に失敗しました');
+          throw new Error('前回登録した動画IDの取得に失敗しました');
         }
 
         const videos = YouTube.Videos.list('id,snippet', {id: id});
         if(!videos || videos.items.length < 1) {
-          throw new Exception('Videoの取得に失敗しました（ID:' + id + '）');
+          throw new Error('Videoの取得に失敗しました（ID:' + id + '）');
         }
         const video = videos.items[0];
 
         if((new Date()).getTime() - (new Date(video.snippet.publishedAt)).getTime() > 10 * 60 * 1000){
-          throw new Exception('更新有効期限が経過しました');
+          throw new Error('更新有効期限が経過しました');
         }
 
         // タイトルの重複を避けるために、現在時間をタイトルに追加する
@@ -132,7 +132,7 @@ function doPost(e) {
           }
         }, 'snippet');
 
-        reply('動画を登録しました\r\n\r\nタイトル：' + videoTitle + '\r\nプレイリスト：' + playListTitle + '\r\n\r\n10秒以内にメッセージを送ることでタイトルを変更できます');
+        reply('動画を登録しました\r\n\r\nタイトル：' + videoTitle + '\r\nプレイリスト：' + playListTitle + '\r\n\r\n10分以内にメッセージを送ることでタイトルを変更できます');
       }
       else {
         reply('未知のメッセージタイプです：' + event.message.type)
