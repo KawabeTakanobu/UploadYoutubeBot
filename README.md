@@ -1,7 +1,6 @@
-# UploadYoutubeBot
-受信した動画をYoutubeへ非公開でアップロードするLINE BOT
+# 受信した動画をYoutubeへ非公開でアップロードするLINE BOT
 
-Google Photo が有料になったので、とりあえず撮った動画をYouTubeに保存する。
+Google Photo が有料になったので、とりあえず撮った動画をYouTubeに保存する LINE BOT を GAS で作成してみた。
 
 ## 備忘
 タイムゾーンを日本にするためにappsscriot.jsonを修正すると
